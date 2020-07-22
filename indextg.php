@@ -10,33 +10,14 @@
 
     //$vendorId  = "test";
     //$hashKey   = "654ekju58xdlps54rw";
-
     $vendorId  = "demo";
-	// $hashKey   = "demoCHANGED";
     $hashKey   = "demo";
-	
-	$liveStatus= 1;
-
-	// $oid	= substr(uniqid(), 0, 10);//Still not unique enough. Lol
-	$oid = uniqid();
-	// $oid = 112;
-
-	$inv	= $oid;
-	// $inv = 112020102292999;
-
-	
-	// $url_host = 'https://payments.ipayafrica.com/v3/ke';
-	$url_host = 'https://payments.elipa.tg/v1/v3/index.php/togo';
-
-	// $valid_channels = ['mpesa', 'airtel', 'equity', 'bonga', 'creditcard', 'elipa'];
-	$valid_channels = ['tmoney', 'flooz', 'creditcard'];
-
-	foreach($valid_channels as $channel){
-		${$channel} = 1;
-	}
+    $liveStatus= 0;
+		//print_r($_GET);
 
 	if(isset($_GET["txncd"]))
 	{
+
 		$val           = $vendorId;
 		$val1          = $_GET['id'];
 		$val2          = $_GET['ivm'];
@@ -49,7 +30,7 @@
 
 		// $ipnUrl        = "https://www.ipayafrica.com/ipn/?vendor=".$val."&id=".$val1."&ivm=".$val2."&qwh=".$val3."&afd=".$val4."&poi=".$val5."&uyt=".$val6."&ifd=".$val7;
 
-		$ipnUrl        = $url_host . "/v1/tg/ipn/check?vendor=".$val."&id=".$val1."&ivm=".$val2."&qwh=".$val3."&afd=".$val4."&poi=".$val5."&uyt=".$val6."&ifd=".$val7;
+		$ipnUrl        = " https://payments.elipa.tg/ipn/?vendor=".$val."&id=".$val1."&ivm=".$val2."&qwh=".$val3."&afd=".$val4."&poi=".$val5."&uyt=".$val6."&ifd=".$val7;
 		
 	
 		$ch = curl_init();
@@ -63,7 +44,9 @@
 		switch ($status) {
 			case 'aei7p7yrx4ae34':
 				$state = "successful";
-				break;
+				$data = file_get_contents('php://input');
+
+				break;	
 
 			case 'fe2707etr5s4wq':
 				$state = "failed";
@@ -94,7 +77,6 @@
 	}
 	elseif(isset($_POST['ttl']))
 	{
-		//var_dump($_POST); die();
 		//Data needed by iPay a fair share of it obtained from the user from a form e.g email, number etc...
 
 		$curr	= isset($_POST['curr'])?$_POST['curr']:exit('Currency is required');
@@ -106,6 +88,14 @@
 		$p3		= isset($_POST['p3'])?$_POST['p3']:'';
 		$p4		= isset($_POST['p4'])?$_POST['p4']:'';
 
+		$oid	= date('YmdHis',time());//Still not unique enough. Lol
+		$inv	= date('YmdHis',time());
+		$oid='19';
+	        $inv='19';
+		$cbk = sprintf("%s://%s%s",
+		isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
+		$_SERVER['SERVER_NAME'],
+		$_SERVER['REQUEST_URI']);
 		$fields = array("live"	=> $liveStatus,
 		                "oid"	=> $oid,
 		                "inv"	=> $inv,
@@ -118,32 +108,47 @@
 		                "p2"	=> $p2,
 		                "p3"	=> $p3,
 		                "p4"	=> $p4,
-		                "cbk"	=> "http://localhost/personal_repos/callback-processing-api",
-		                "lbk" 	=> "",
+		                "cbk"	=> $cbk,
+		                "lbk" 	=> "http://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
 		                "cst"	=> "1",
-		                "crl"	=> "2",
-		                "autopay" => "0"
-						);
-						
-		foreach($valid_channels as $channel){
-			$fields[$channel] = isset($_POST[$channel])?$_POST[$channel]:${$channel};
-		}
+		                "crl"	=> "1",
+		                "autopay" => "0",
+			        "creditcard" => "1",
+		                "flooz" => "1",
+		                "tmoney" => "1",
+		                "elipa" => "0"
+		                );
 		
 		$datastring = $fields['live'].$fields['oid'].$fields['inv'].$fields['ttl'].$fields['tel'].$fields['eml'].$fields['vid'].$fields['curr'].$fields['p1'].$fields['p2'].$fields['p3'].$fields['p4'].$fields['cbk'].$fields['cst'].$fields['crl'];
-
-		echo "datastring: " . $datastring;
-
-
 		
+		
+
 		$generated_hash = hash_hmac('sha1',$datastring , $hashKey);
+		$fields['hsh'] = $generated_hash;
+		echo 'https://payments.elipa.tg/v1/v3/index.php/togo?' . http_build_query($fields);
+		echo "<br />";
+		echo $datastring . "<br />";
+		echo $generated_hash;
+		unset($fields['hsh']);
 
-
-		echo " hash: " . $generated_hash;
 
 		?>
 		<!--    Generate the form for redirecting to iPay hosted payment page-->
-		<!-- <form method="post" id="ipayform" action="https://payments.elipa.co.tz/v3/tz"> -->
-		<form method="post" id="ipayform" action="<?php echo $url_host /* . "/v1/tg/" */ ?>">
+		<!-- <form method="post" id="ipayform" action="https://ipay-staging.ipayafrica.com/v1/tg/"> -->
+		<script src="https://code.jquery.com/jquery-1.7.2.min.js"
+			  integrity="sha256-R7aNzoy2gFrVs+pNJ6+SokH04ppcEqJ0yFLkNGoFALQ="
+			  crossorigin="anonymous">
+			  
+			//document.getElementById('ipayform').submit();
+			$('#myform').submit(function() {
+				alert('test');
+				<?php file_put_contents("post.log", print_r($_POST, true)); ?>
+			    // DO STUFF...
+			    return true; // return false to cancel form action
+			});
+		</script>
+
+		<form name ="myform" method="post" id="ipayform" action="https://payments.elipa.tg/v1/v3/index.php/togo">
 
 			<?php 
 			foreach ($fields as $key => $value) {
@@ -151,32 +156,24 @@
 				echo '&nbsp;:<input name="'.$key.'" type="text" value="'.$value.'"></br>';
 			}
 			?>
+				
+
 			hsh:&nbsp;<input name="hsh" type="text" value="<?php echo $generated_hash ?>" ><br>
 			<button type="submit">&nbsp;Lipa&nbsp;</button>
 			<?php echo "Loading..."; ?>
 		</form>
-		<script>
-			//document.getElementById('ipayform').submit();
-		</script>
 	<?php
+
 	}
 
 	else 
 	{
 		?>
 		<!--    Generate the form  -->
-		<form method="post" action="index.php">
-			live&nbsp;:<input name="live" type="text" value=<?php echo $liveStatus;?>></br>
-			<?php
-				foreach($valid_channels as $channel){
-					echo $channel.'&nbsp;:<input name="'.$channel.'" type="text" value="'.${$channel}.'"></br>';
-				}
-			?>
-			oid&nbsp;:<input name="oid" type="text" value=<?php echo $oid;?>></br>
-			inv&nbsp;:<input name="inv" type="text" value=<?php echo $inv;?>></br>
-			curr&nbsp;:<input name="curr" type="text" value=<?php echo "XOF";?>></br>
-			ttl&nbsp;:<input name="ttl" type="text" value="1"></br>
-			tel&nbsp;:<input name="tel" type="text" value="22898338806"></br>
+		<form method="post" action="indextg.php">
+			curr&nbsp;:<input name="curr" type="text" value="XOF"></br>
+			ttl&nbsp;:<input name="ttl" type="text" value="1.00"></br>
+			tel&nbsp;:<input name="tel" type="text" value="254725049683"></br>
 			eml&nbsp;:<input name="eml" type="text" value="jude@ipayafrica.com"></br>
 			p1&nbsp;:<input name="p1" type="text" value=""></br>
 			p2&nbsp;:<input name="p2" type="text" value=""></br>
