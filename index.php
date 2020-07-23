@@ -7,29 +7,19 @@
     function_exists('date_default_timezone_set') && date_default_timezone_set('Etc/GMT-3');
     header('Content-type: text/html; charset=utf-8');
 
-
-    //$vendorId  = "test";
-    //$hashKey   = "654ekju58xdlps54rw";
-
     $vendorId  = "demo";
-	// $hashKey   = "demoCHANGED";
-    $hashKey   = "demo";
+    $hashKey   = "demoCHANGED";
 	
 	$liveStatus= 1;
 
-	// $oid	= substr(uniqid(), 0, 10);//Still not unique enough. Lol
 	$oid = uniqid();
-	// $oid = 112;
 
 	$inv	= $oid;
-	// $inv = 112020102292999;
 
 	
-	// $url_host = 'https://payments.ipayafrica.com/v3/ke';
-	$url_host = 'https://payments.elipa.tg/v1/v3/index.php/togo';
+	$url_host = 'https://payments.ipayafrica.com/v3/ke';
 
-	// $valid_channels = ['mpesa', 'airtel', 'equity', 'bonga', 'creditcard', 'elipa'];
-	$valid_channels = ['tmoney', 'flooz', 'creditcard'];
+	$valid_channels = ['mpesa', 'airtel', 'equity', 'bonga', 'creditcard', 'elipa'];
 
 	foreach($valid_channels as $channel){
 		${$channel} = 1;
@@ -47,10 +37,7 @@
 		$val7          = $_GET['ifd'];
 
 
-		// $ipnUrl        = "https://www.ipayafrica.com/ipn/?vendor=".$val."&id=".$val1."&ivm=".$val2."&qwh=".$val3."&afd=".$val4."&poi=".$val5."&uyt=".$val6."&ifd=".$val7;
-
-		$ipnUrl        = $url_host . "/v1/tg/ipn/check?vendor=".$val."&id=".$val1."&ivm=".$val2."&qwh=".$val3."&afd=".$val4."&poi=".$val5."&uyt=".$val6."&ifd=".$val7;
-		
+		$ipnUrl        = "https://www.ipayafrica.com/ipn/?vendor=".$val."&id=".$val1."&ivm=".$val2."&qwh=".$val3."&afd=".$val4."&poi=".$val5."&uyt=".$val6."&ifd=".$val7;
 	
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $ipnUrl);
@@ -141,9 +128,8 @@
 		echo " hash: " . $generated_hash;
 
 		?>
-		<!--    Generate the form for redirecting to iPay hosted payment page-->
-		<!-- <form method="post" id="ipayform" action="https://payments.elipa.co.tz/v3/tz"> -->
-		<form method="post" id="ipayform" action="<?php echo $url_host /* . "/v1/tg/" */ ?>">
+
+		<form method="post" id="ipayform" action="<?php echo $url_host ?>">
 
 			<?php 
 			foreach ($fields as $key => $value) {
@@ -174,10 +160,10 @@
 			?>
 			oid&nbsp;:<input name="oid" type="text" value=<?php echo $oid;?>></br>
 			inv&nbsp;:<input name="inv" type="text" value=<?php echo $inv;?>></br>
-			curr&nbsp;:<input name="curr" type="text" value=<?php echo "XOF";?>></br>
+			curr&nbsp;:<input name="curr" type="text" value=<?php echo "KES";?>></br>
 			ttl&nbsp;:<input name="ttl" type="text" value="1"></br>
-			tel&nbsp;:<input name="tel" type="text" value="22898338806"></br>
-			eml&nbsp;:<input name="eml" type="text" value="jude@ipayafrica.com"></br>
+			tel&nbsp;:<input name="tel" type="text" value="254724419446"></br>
+			eml&nbsp;:<input name="eml" type="text" value="andrew@ipayafrica.com"></br>
 			p1&nbsp;:<input name="p1" type="text" value=""></br>
 			p2&nbsp;:<input name="p2" type="text" value=""></br>
 			p3&nbsp;:<input name="p3" type="text" value=""></br>
